@@ -1,0 +1,33 @@
+# Apache local configuration file for the redirector.
+
+# The script could run under FastCGI or one of its variant. But given the low
+# traffic (and the impossibility to configure this generically), let’s stick to
+# GCI for now.
+Options +ExecCGI
+AddHandler cgi-script .fcgi
+
+# If using a different path prefix (not serving from the root directory of
+# the virtual host), then you should edit this regex, replacing the '/' at
+# the beginning with '/foo/' for example.
+#
+# If you are on a trusted network (intranet) and you want anyone to be able to
+# add new redirections, then you can simply remove this block. Otherwise you
+# will also need to create a password file and set the path to it below in the
+# AuthUserFile directive.
+<If "%{REQUEST_URI} =~ m#^/(new|submit)#">
+  AuthType Basic
+  AuthName "Redirector admin area"
+  AuthUserFile "/path/to/.htpasswd"
+  Require valid-user
+</If>
+
+# Ensures that all requests are handled by the script.
+# This requires  that mod_rewrite.c is present (but there is not much point to
+# test for its presence as we can’t do anything without it).
+#
+# Similarly , the RewriteBase must be updated too (for example to '/foo', without
+# trailing slashes this time).
+DirectoryIndex redirector.fcgi
+RewriteEngine On
+RewriteBase /
+RewriteRule . redirector.fcgi [END]
