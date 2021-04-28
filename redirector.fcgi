@@ -555,7 +555,7 @@ __DATA__
       <input type="submit" value="Submit">
     </form>
   </div>
-  <div><small>Favicon from <a href=\"https://icons8.com/\">ICONS8<a/> (<a href=\"https://iconarchive.com/show/windows-8-icons-by-icons8/Files-Add-Link-icon.html\">source</a>).</small></div>
+  <div><small>Favicon from <a href="https://icons8.com/">ICONS8<a/> (<a href="https://iconarchive.com/show/windows-8-icons-by-icons8/Files-Add-Link-icon.html">source</a>).</small></div>
 </body>
 </html>
 
@@ -571,7 +571,7 @@ __DATA__
     <h1>{$status}</h1>
     <p>{$text}</p>
   </div>
-  <div><small>Favicon from <a href=\"https://icons8.com/\">ICONS8<a/> (<a href=\"https://iconarchive.com/show/windows-8-icons-by-icons8/Files-Add-Link-icon.html\">source</a>).</small></div>
+  <div><small>Favicon from <a href="https://icons8.com/">ICONS8<a/> (<a href="https://iconarchive.com/show/windows-8-icons-by-icons8/Files-Add-Link-icon.html">source</a>).</small></div>
 </body>
 </html>
 
@@ -649,7 +649,7 @@ EOT
 EOT
 }}
   </div>
-  <div><small>Favicon from <a href=\"https://icons8.com/\">ICONS8<a/> (<a href=\"https://iconarchive.com/show/windows-8-icons-by-icons8/Files-Add-Link-icon.html\">source</a>).</small></div>
+  <div><small>Favicon from <a href="https://icons8.com/">ICONS8<a/> (<a href="https://iconarchive.com/show/windows-8-icons-by-icons8/Files-Add-Link-icon.html">source</a>).</small></div>
 </body>
 </html> 
 
