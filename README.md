@@ -18,6 +18,8 @@ Finally, open the script and search for `%% config.txt` to find the configuratio
 
 If the script is being served from `redirect.example.com`, you can go to `redirect.example.com/new` to create new redirection. The name of the redirection can be anything that does not contain any whitespace characters. The pattern can be anything at all and should contain the scheme (e.g. `https://`) as it will not be added automatically.
 
+Note that if the redirection scheme is neither `http` nor `https`, then the redirection will be done in Javascript and not through an HTTP redirect.
+
 In addition, you can execute snippets of Perl code by placing them within braces in the redirection pattern. These snippets have access to the following variables:
 
 -   `$path`: the path that was passed after the name of the redirection.

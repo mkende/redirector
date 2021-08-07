@@ -19,7 +19,7 @@ sub main {
   while(my $q = CGI::Fast->new) {
     eval {
       my $redirector = Redirector->new($q);
-      
+
       if ($redirector->is_debug) {
         $redirector->print_debug;
       } elsif ($redirector->is_error) {
@@ -40,12 +40,12 @@ sub main {
 
 { package Redirections;
   # This package loads a set of redirection from a text file and allows to save new redirections.
-  
+
   use File::Spec::Functions 'catfile';
   use FindBin;
-  
+
   our %redir = load();
-  
+
   sub redir_file {
     return catfile($FindBin::Bin, 'redir.txt');
   }
@@ -67,7 +67,7 @@ sub main {
     close $fh or return "Cannot close redirection file: $!";
     return;
   }
-  
+
   # Return the content that would be saved.
   sub format_data {
     return join("\n", (map { $_.'    '.$redir{$_} } (sort keys %redir)), '');
@@ -94,7 +94,7 @@ sub main {
     my ($class, $q) = @_;
 
     my $self = bless {q => $q}, $class;
-    
+
     #my $command = uri_unescape($q->url(-absolute=> 1, -path => 1));
     #$command = $ARGV[0] if !$command && @ARGV;
     my $prefix = $::config{path_prefix} =~ s{(?<!/)$}{/}r;
@@ -118,9 +118,9 @@ sub main {
       $self->{error_text} = "Could not parse request: '${error}'.";
       return $self;
     }
-    
+
     my $method = $q->request_method() || 'GET';
-    
+
     if ($self->{base_file} eq 'submit') {
       if ($method ne 'POST') {
         $self->{error_status} = '400 Invalid request method';
@@ -130,13 +130,13 @@ sub main {
       $self->validate_submit;
       return $self;
     }
-    
+
     if ($method ne 'GET') {
       $self->{error_status} = '400 Invalid request method';
       $self->{error_text} = "Invalid request method ('${method}'), should be 'GET'.";
       return $self;      
     }
-    
+
     if (Data::exists($self->{base_file}.'.html') && Data::mode($self->{base_file}.'.html') =~ m/\bstatic\b/) {
       $self->{static_file} = $self->{base_file}.'.html';
       return $self;
@@ -151,7 +151,7 @@ sub main {
       $self->{error_text} = "No redirection found for '$self->{base_file}'.";
       return $self;
     }
-    
+
     # This will trigger if the Perl code in a redirection is broken or forbidden by the
     # Safe compartment.
     my $forbidden_redirect = sub {
@@ -167,13 +167,13 @@ sub main {
         -safe => $safe,
         -broken => $forbidden_redirect,
         -hash => {path => $self->{path}, UA => $ENV{HTTP_USER_AGENT}, args => $self->{args}, %args});
-    
+
     return $self;
   }
-  
+
   sub validate_submit {
     my ($self) = @_;
-    
+
     my ($name, $pattern) = (scalar($self->{q}->param('name')), scalar($self->{q}->param('pattern')));
     if (not $name) {
       $self->{error_status} = '400 Missing redirect name';
@@ -236,12 +236,12 @@ sub main {
     my $tt = Text::Template->new(-type => 'STRING', -source => Data::data('error.html.tt'));
     print $tt->fill_in(-hash => {status => encode_entities($self->{error_status}), text => encode_entities($self->{error_text})});
   }
-  
+
   sub is_static {
     my ($self) = @_;
     return $self->{static_file};
   }
-  
+
   sub print_static {
     my ($self) = @_;
     my $mime = Data::mime($self->{static_file});
@@ -249,7 +249,7 @@ sub main {
     print $self->{q}->header(-type => $mime, -charset => $charset);
     print Data::data($self->{static_file});
   }
-  
+
   { # Package used to render the debug template.
     package DebugTemplate;
 
@@ -277,7 +277,14 @@ sub main {
 
   sub redirect {
     my ($self) = @_;
-    print $self->{q}->redirect(-uri => $self->{dest}, -status => '302 Found');
+    if ($self->{dest} =~ m{(\w+)://} && $1 =~ m/https?/) {
+      print $self->{q}->redirect(-uri => $self->{dest}, -status => '302 Found');
+    } else {
+    print $self->{q}->header;
+    }
+    my $tt = Text::Template->new(-type => 'STRING', -source => Data::data('redirect.html.tt'));
+    print $tt->fill_in(-hash => {target => encode_entities($self->{dest})});
+    return;
   }
 }  # package Redirector
 
@@ -297,7 +304,7 @@ sub main {
   use Mail::Sendmail 0.75, 'sendmail';
   use MIME::Base64 'encode_base64';
   use MIME::QuotedPrint 'encode_qp';
-    
+
   # %options should be (from => '...', to => '...', subject => '...')
   # and any options from Mail::Sendmail (server, port, auth, ...) except body, message or text.
   sub new {
@@ -305,16 +312,16 @@ sub main {
     my $self = bless {}, $class;
     $self->{boundary} = '===='.time().'====';
     $self->{mail} = \%options;
-    
+
     return $self;
   }
-  
+
   # Undef if no error.
   sub error {
     my ($self) = @_;
     return $self->{error};
   }
-  
+
   # Body should be a unicode string. It will be sent as quoted-printable encoded UTF-8 text.
   sub body {
     my ($self, $body) = @_;
@@ -328,7 +335,7 @@ sub main {
     my ($self, $name, $data) = @_;
     push @{$self->{attachments}}, [$name, $data];
   }
-  
+
   sub send {
     my ($self) = @_;
     unless ($self->{body}) {
@@ -481,7 +488,7 @@ __DATA__
 # This is the configuration for the program. You can either edit it here
 # directly or you can copy the content of this snippet (until the next starting
 # with %%) into a file called config.txt in the script directory and that file
-# will take precedance over the content here.
+# will take precedence over the content here.
 #
 # Technically this file is made of Perl source code that should return a hash
 # reference with all the configuration option of the program.
@@ -503,10 +510,10 @@ __DATA__
   backup_mail => {
     # The SMTP server to connect to. Defaults to 'localhost' if unspecified.
     server => 'smtp.exampple.com',
-    
+
     # The SMTP port. Default to 25 if unspecified.
     port => 587,
-    
+
     # Authentication parameter. No authentication is performed if omitted.
     # The method field specify the authentication methods that will be
     # attempted. The value set here list all supported method and the field
@@ -522,10 +529,10 @@ __DATA__
 
     # The email adress to which the backup is sent.
     to => 'admin@example.com',
-    
+
     # The email adress from which the backup appears to be sent.
     from => 'user@example.com',
-    
+
     # The subject of the backup email.
     subject => 'redirector.example.com backup',
   },
@@ -558,6 +565,32 @@ __DATA__
   <div><small>Favicon from <a href="https://icons8.com/">ICONS8<a/> (<a href="https://iconarchive.com/show/windows-8-icons-by-icons8/Files-Add-Link-icon.html">source</a>).</small></div>
 </body>
 </html>
+
+%% redirect.html.tt
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Redirector</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <script>
+    window.onload = function() \{
+      window.location.href = "{$target}";
+    \}
+    window.setTimeout(function() \{
+      window.location.href = "{$target}";
+    \}, 5000);
+  </script>
+</head>
+<body>
+  <div>
+    <p>If you are seeing this page and you are not redirected after 5 seconds, click <a href="{$target}">here</a>.</p>
+  </div>
+  <div><small>Favicon from <a href="https://icons8.com/">ICONS8<a/> (<a href="https://iconarchive.com/show/windows-8-icons-by-icons8/Files-Add-Link-icon.html">source</a>).</small></div>
+</body>
+</html>
+
 
 %% error.html.tt
 
